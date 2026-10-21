@@ -9,16 +9,19 @@ function friendlyError(e: unknown): string {
   if (msg.includes("VITE_GEMINI_API_KEY")) {
     return "I can't reach Gemini yet. Add your API key to the .env file and restart the dev server.";
   }
-  if (msg.includes("429") || /quota|rate/i.test(msg)) {
-    return "I've hit Gemini's rate limit. Wait a moment and try again.";
-  }
-  if (msg.includes("404") || /not found/i.test(msg)) {
+  if (/\b404\b|NOT_FOUND/.test(msg)) {
     return "Gemini couldn't find that model. Check VITE_GEMINI_MODEL in your .env file.";
   }
-  if (msg.includes("401") || msg.includes("403") || /api key/i.test(msg)) {
+  if (/\b(401|403)\b|PERMISSION_DENIED|UNAUTHENTICATED|API_KEY_INVALID|API key not valid/i.test(msg)) {
     return "Gemini rejected the API key. Check it in your .env file.";
   }
-  return "Something went wrong talking to Gemini. Please try again.";
+  if (/\b429\b|RESOURCE_EXHAUSTED|quota|rate limit/i.test(msg)) {
+    return "I've hit Gemini's usage limit. Wait a minute and try again.";
+  }
+    if (/\b503\b|UNAVAILABLE/.test(msg)) {
+    return "Gemini is very busy right now. Please try again in a minute.";
+  }
+  return `Gemini error: ${msg.slice(0, 300)}`;
 }
 
 /** Send a user message through the agent. Resolves with the reply (null on failure). */

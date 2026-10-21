@@ -4,6 +4,8 @@ import { callTool, geminiDeclarations } from "../tools";
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 const MODEL = (import.meta.env.VITE_GEMINI_MODEL as string | undefined) || "gemini-2.5-flash";
+// Optional backup model, used if the main one stays busy.
+const FALLBACK_MODEL = (import.meta.env.VITE_GEMINI_FALLBACK_MODEL as string | undefined) || "";
 
 const SYSTEM = `You are Kitchen Copilot, a friendly voice assistant for a kitchen and grocery brand. You simulate an Alexa+ experience.
 
@@ -22,6 +24,27 @@ export const resetConversation = () => {
   history = [];
 };
 
+type GenerateParams = Parameters<GoogleGenAI["models"]["generateContent"]>[0];
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Retry on temporary errors (429 rate limit, 503 busy). After the first failure,
+// switch to the backup model if one is set in .env.
+async function generateWithRetry(ai: GoogleGenAI, params: GenerateParams) {
+  let model = params.model;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await ai.models.generateContent({ ...params, model });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      const retryable = /\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE/.test(msg);
+      if (!retryable || attempt >= 4) throw e;
+      if (attempt >= 1 && FALLBACK_MODEL) model = FALLBACK_MODEL;
+      await sleep(2000 * (attempt + 1)); // waits 2s, 4s, 6s, 8s
+    }
+  }
+}
+
 export async function runAgent(userText: string): Promise<string> {
   if (!apiKey) {
     throw new Error("Missing VITE_GEMINI_API_KEY. Copy .env.example to .env and add your key.");
@@ -31,7 +54,7 @@ export async function runAgent(userText: string): Promise<string> {
 
   // Allow several tool-calling rounds for multi-step requests.
   for (let step = 0; step < 6; step++) {
-    const res = await ai.models.generateContent({
+    const res = await generateWithRetry(ai, {
       model: MODEL,
       contents: history,
       config: {
