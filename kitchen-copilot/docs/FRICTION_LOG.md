@@ -2,8 +2,8 @@
 
 ## Entry 1
 - **Task attempted:** Initial project scaffolding with Vite, React, TS, and Tailwind.
-- **Steps taken:** Ran `npm create vite`, installed Tailwind dependencies, configured `tailwind.config.js` and `index.css`.
-- **Expected vs actual:** Expected a smooth setup. Actual: Had to clear previous dummy files to allow Vite to scaffold in the existing directory.
+- **Steps taken:** Ran `npm create vite`, installed Tailwind and Gemini dependencies, configured `vite.config.ts` and `index.css`.
+- **Expected vs actual:** Expected a smooth setup. Actual: GitHub secret scanning flagged the `.env.example` placeholder as a potential secret, requiring a manual "false positive" unblock.
 - **Severity:** low
-- **Workaround:** Allowed Vite to overwrite the empty directory.
-- **Suggestion:** Amazon hackathon docs could include a direct "start from existing git repo" Vite command to save 2 minutes.
+- **Workaround:** Navigated to the GitHub security URL provided in the terminal and marked the detection as a false positive.
+- **Suggestion:** Hackathon guides could explicitly mention using dummy text like "your_key_here" instead of realistic-looking strings to avoid triggering GitHub's secret scanner.
