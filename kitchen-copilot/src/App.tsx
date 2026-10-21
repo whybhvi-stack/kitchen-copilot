@@ -1,8 +1,7 @@
-  function App() {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <h1 className="text-3xl font-bold text-blue-600">Kitchen Copilot</h1>
-      </div>
-    )
-  }
-  export default App
+ export default function App() {
+     return (
+       <div className="min-h-screen grid place-items-center bg-stone-900 text-stone-100">
+         <h1 className="text-3xl font-bold">Kitchen Copilot</h1>
+       </div>
+     );
+   }
