@@ -4,6 +4,8 @@ A **simulated Alexa+ experience**: a voice-first cooking assistant that understa
 natural language, picks the right tool, runs it, and answers. Every tool call is shown
 live so you can see exactly how the assistant works.
 
+Companion repo: [Kitchen MCP Server](https://github.com/whybhvi-stack/kitchen-mcp-server)
+
 Built for the **Amazon Developer Hackathon, Alexa+ track** (simulated-experience path).
 
 ## What it does
